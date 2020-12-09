@@ -1,8 +1,8 @@
 SOURCES:=$(shell ls ./src/*.c)
 INCLUDESDIR:=includes
 LDFLAGS:=
-CFLAGS:=-Wall -shared -fstack-protector-all -fPIC -std=gnu99 -I./$(INCLUDESDIR)/
-TARGET:=libvisualize.so
+CFLAGS:=-c -Wall -shared -fstack-protector-all -fPIC -std=gnu99 -I./$(INCLUDESDIR)/
+TARGET:=libvisualize
 BUILDDIR:=build
 CC:=gcc
 
@@ -14,8 +14,8 @@ clean:
 	rm -f $(TARGET)
 
 $(TARGET): $(SOURCES)
-	$(CC) -o $(BUILDDIR)/$(TARGET) $(CFLAGS) $(SOURCES) $(LDFLAGS)
+	$(CC) -o $(BUILDDIR)/$(TARGET).o $(CFLAGS) $(SOURCES) $(LDFLAGS)
 
 test: $(TARGET)
-	$(CC) -o test/test test/test.c -Wall -I./includes/ -L./build -l:libvisualize.so
-	LD_LIBRARY_PATH=./build ./test/test
+	$(CC) -o test/test test/test.c -I./$(INCLUDESDIR)/ -L./$(BUILDDIR) -l:$(TARGET).o
+	./test/test

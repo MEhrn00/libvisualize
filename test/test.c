@@ -1,8 +1,15 @@
+#include <stdio.h>
+
 #include "libvisualize.h"
 
 int main() {
 
-    volatile char foo[] = {'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', '\0'};
+    char buf[0x20];
+
+    visualize_stack();
+
+    printf("input > ");
+    fgets(buf, 0x20 + 17, stdin);
 
     visualize_stack();
 
