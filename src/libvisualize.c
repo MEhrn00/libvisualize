@@ -4,15 +4,25 @@
 
 #include "libvisualize.h"
 
-// #defines for colors
-#define COLOR_RED       "\x1b[31m"
-#define COLOR_GREEN     "\x1b[32m"
-#define COLOR_BLUE      "\x1b[34m"
-#define COLOR_YELLOW    "\x1b[33m"
-#define COLOR_RESET     "\x1b[0m"
+static uint64_t *search(uint64_t token, uint64_t *start, uint64_t *end) {
+    int delta = (end - start);
 
+    for (int i = 0; i <= delta; i++) {
+        if (start[i] == token) {
+            return start + i;
+        }
+    }
 
-// TODO: Implement canary checking and displaying
+    return NULL;
+}
+
+static uint64_t get_canary() {
+    long canary = 0;
+    __asm__("movq %%fs:0x28, %0;" :"=r"(canary));
+
+    return canary;
+}
+
 void visualize_stack() {
     uint64_t arr[1];
     uint64_t *rbp;
@@ -35,11 +45,27 @@ void visualize_stack() {
     // Calculate the difference between RBP and RSP
     delta = rbp - rsp;
 
-    // Print the legend at the top containing the registers and return address
     printf("\n");
+
+
+    // Print the legend at the top containing the registers and return address
     printf("RSP = %p\n", rsp);
     printf("RBP = %p\n", rbp);
 
+    // Get the canary and print it
+    if (canary == NULL || !(rsp <= canary && canary <= rbp))
+        canary = search(get_canary(), rsp, rbp);
+
+    if (canary == NULL) {
+        printf("Canary not found.\n");
+    } else {
+        printf("Canary = %p -> ", canary);
+        printf(COLOR_YELLOW);
+        printf("%#018lx\n", *canary);
+        printf(COLOR_RESET);
+    }
+
+    // Print out the return address
     printf("RET = %p -> ", ret_p);
     printf(COLOR_RED);
     printf("%#018lx", *ret_p);
@@ -48,7 +74,7 @@ void visualize_stack() {
 
     // Print out a hexdump of the stack
     printf("Stack:\n");
-    for (int i = 0; i <= delta; i++) {
+    for (int i = 0; i <= delta - 2; i++) {
         printf("%p | ", rsp);
         for (int j = 0; j < 8; j++) {
             printf("%02x ", *((uint8_t *)rsp + j));
@@ -57,7 +83,30 @@ void visualize_stack() {
         rsp++;
     }
 
-    // Print out the color hexdump of the return address
+    // Print out the canary
+    if (canary != NULL) {
+        printf("%p | ", rsp);
+        printf(COLOR_YELLOW);
+        for (int i = 0; i < 8; i++) {
+            printf("%02x ", *((uint8_t *)rsp + i));
+        }
+        printf(COLOR_RESET);
+        printf("|\n");
+        rsp++;
+    }
+
+    // Print out he rest of the stack
+    delta = ret_p - rsp;
+    for (int i = 0; i < delta; i++) {
+        printf("%p | ", rsp);
+        for (int j = 0; j < 8; j++) {
+            printf("%02x ", *((uint8_t *)rsp + j));
+        }
+        printf("|\n");
+        rsp++;
+    }
+
+    // Print out the the return address
     printf("%p | ", rsp);
     printf(COLOR_RED);
     for (int i = 0; i < 8; i++) {
