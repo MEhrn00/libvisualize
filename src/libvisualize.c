@@ -53,7 +53,7 @@ void visualize_stack() {
     printf("RBP = %p\n", rbp);
 
     // Get the canary and print it
-    if (canary == NULL || !(rsp <= canary && canary <= rbp))
+    if (canary == NULL && !(rsp <= canary && canary <= rbp))
         canary = search(get_canary(), rsp, rbp);
 
     if (canary == NULL) {
