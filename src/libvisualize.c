@@ -1,7 +1,3 @@
-#include <assert.h>
-#include <stddef.h>
-#include <stdio.h>
-
 #include "libvisualize.h"
 
 static uint64_t *search(uint64_t token, uint64_t *start, uint64_t *end) {

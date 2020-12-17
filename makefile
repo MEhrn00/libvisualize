@@ -1,21 +1,21 @@
-SOURCES:=$(shell ls ./src/*.c)
-INCLUDESDIR:=includes
-LDFLAGS:=
-TESTFLAGS:=
-CFLAGS:=-c -fno-stack-protector -Wall -Wno-frame-address -shared -fPIC -std=gnu99 -I./$(INCLUDESDIR)/
-TARGET:=libvisualize
-BUILDDIR:=build
-CC:=gcc
+SOURCES = $(wildcard ./src/*.c)
+INCLUDES = -I./includes
+LDFLAGS =
+TESTFLAGS =
+CFLAGS = -fno-stack-protector -Wall -Wno-frame-address -shared -fPIC -std=gnu99
+TARGET = libvisualize
+BUILDDIR = build
+CC = gcc
 
-.PHONY: all clean $(TARGET)
+.PHONY: all clean build
 
-all: $(TARGET)
+all: build
 
 clean:
-	rm -f $(TARGET)
+	rm -f $(BUILDDIR)/$(TARGET).o
 
-$(TARGET): $(SOURCES)
-	$(CC) -o $(BUILDDIR)/$(TARGET).o $(CFLAGS) $(SOURCES) $(LDFLAGS)
+build: $(SOURCES)
+	$(CC) -o $(BUILDDIR)/$(TARGET).o -c $(INCLUDES) $(CFLAGS) $(SOURCES) $(LDFLAGS)
 
 debug: $(SOURCES)
 	$(CC) -o $(BUILDDIR)/$(TARGET).o -g $(CFLAGS) $(SOURCES) $(LDFLAGS)

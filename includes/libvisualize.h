@@ -8,7 +8,9 @@
 #define COLOR_YELLOW    "\x1b[33m"
 #define COLOR_RESET     "\x1b[0m"
 
+#include <stddef.h>
 #include <stdint.h>
+#include <stdio.h>
 
 static uint64_t *canary = NULL;
 
